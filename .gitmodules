@@ -1,0 +1,3 @@
+[submodule "datasets/soft-robot-koopman"]
+	path = datasets/soft-robot-koopman
+	url = https://github.com/ramvasudevan/soft-robot-koopman
