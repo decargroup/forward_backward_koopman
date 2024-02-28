@@ -1,0 +1,4 @@
+regressor:
+  _target_: utilities.LmiEdmdSpectralRadiusConstrForw
+  spectral_radius: 0.99999
+  new_eps: -1

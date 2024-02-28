@@ -1,0 +1,6 @@
+# Figure rcparams used in the experiment
+figure_rcparams:
+  font.family: serif
+  font.size: 10
+  lines.linewidth: 1.5
+  figure.constrained_layout.use: True

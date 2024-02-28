@@ -1,0 +1,2 @@
+regressor:
+  _target_: utilities.LmiEdmdSpectralRadiusConstrAvgNoAS

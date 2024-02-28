@@ -1,0 +1,4 @@
+pykoop_pipeline:
+  _target_: pykoop.KoopmanPipeline
+  lifting_functions: ???
+  regressor: ???

@@ -1,0 +1,8 @@
+_target_: plot.PlotPaper
+lifting_functions: poly2_centers10
+robot: nl_msd
+variance: 0.01
+delay: 0
+# Number of data to keep for plotting
+n: 2100
+val: 0

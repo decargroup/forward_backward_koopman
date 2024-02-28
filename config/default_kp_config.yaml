@@ -1,0 +1,16 @@
+defaults:
+  - setups@_here_: kp_pipeline
+  - regressors@pykoop_pipeline: FBEDMD-AS
+  - lifting_functions@pykoop_pipeline: nl_msd_poly2_centers10
+  - _self_
+
+robot: nl_msd
+variance: 0.01
+delay: 0
+
+hydra:
+  run:
+    dir: ./build/outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
+  sweep:
+    dir: ./build/multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}

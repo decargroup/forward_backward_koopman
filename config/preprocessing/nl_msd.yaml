@@ -1,0 +1,22 @@
+data:
+  _target_: preprocess.PreprocessNonlinearMassSpringDamper
+  normalize: True
+  delay: 0
+  seed: 1
+  noise: 0.01
+  m: 0.1
+  k: 0.1
+  k2: 0.001
+  c: 0.01
+  t0: 0
+  t1: 50
+  dt: 0.01
+  x0_0: -5
+  x0_1: 5
+  n_eps_train: 20
+  n_eps_valid: 2
+  u_min: -1
+  u_max: 1
+  cutoff_freq: 0.5
+  filter_order: 4
+path: "place_holder"

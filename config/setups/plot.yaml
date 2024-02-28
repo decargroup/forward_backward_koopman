@@ -1,0 +1,12 @@
+# Figure rcparams used in the experiment
+figure_rcparams:
+  font.size: ??
+  lines.linewidth: ???
+  figure.constrained_layout.use: ???
+
+what_to_plot:
+  _target_: ???
+  regressors: ???
+  lifting_functions: ???
+  robot: ???
+  variance: ???

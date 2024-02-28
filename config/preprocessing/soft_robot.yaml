@@ -1,0 +1,11 @@
+data:
+  _target_: preprocess.PreprocessSoftRobot
+  val_num: 4
+  normalize: True
+  delay: 0
+  seed: 1
+  noise: 0.01
+  train_eps_rmv: 0
+  n_rmv_front: 100
+  n_rmv_back: 0
+path: datasets/soft-robot-koopman/datafiles/softrobot_train-13_val-4.mat

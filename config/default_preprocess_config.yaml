@@ -1,0 +1,12 @@
+defaults:
+  # Setting default for preprocessed data
+  - setups@preprocessing: preprocess
+  - preprocessing: soft_robot
+  - _self_
+
+hydra:
+  run:
+    dir: ./build/outputs/${hydra.job.name}/${now:%Y-%m-%d_%H-%M-%S}
+  sweep:
+    dir: ./build/multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}
