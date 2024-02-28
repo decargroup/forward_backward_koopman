@@ -52,8 +52,4 @@ Thumbs.db
 .venv
 
 # output folder
-outputs/
-multirun/
-figures/
-pykoop_objects/
-preprocessed_data/
+build/
