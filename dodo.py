@@ -1,32 +1,4 @@
-import pathlib
 import numpy as np
-
-WORKING_DIR = pathlib.Path(__file__).parent.resolve()
-
-BUILD_DIR = WORKING_DIR.joinpath('build')
-
-BUILD_DIRS = {
-    dir: BUILD_DIR.joinpath(dir)
-    for dir in [
-        'figures',
-        'outputs',
-        'multirun',
-        'preprocessed_data',
-        'pykoop_objects',
-    ]
-}
-
-CONFIG_DIR = WORKING_DIR.joinpath('config')
-
-CONFIG_DIRS = {
-    dir: CONFIG_DIR.joinpath(dir)
-    for dir in [
-        'lifting_functions',
-        'regressor',
-        'plotting',
-        'preprocessing',
-    ]
-}
 
 
 def task_generate__data():
