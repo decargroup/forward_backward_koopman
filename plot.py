@@ -74,13 +74,13 @@ class PlotPaper():
         utilities.plot_polar(koop_matrices, path, self.robot, **kwargs)
         if self.robot == 'nl_msd':
             utilities.summary_fig(x_pred,
-                                true_data,
-                                path,
-                                norm_params,
-                                self.robot,
-                                n=self.n,
-                                val=self.val,
-                                **kwargs)
+                                  true_data,
+                                  path,
+                                  norm_params,
+                                  self.robot,
+                                  n=self.n,
+                                  val=self.val,
+                                  **kwargs)
         # utilities.print_koop_matrices(koop_matrices, **kwargs)
 
 
@@ -162,8 +162,8 @@ class PlotFrobErr():
 
         frob_error = {'U': frob_error_U, 'A': frob_error_A, 'B': frob_error_B}
 
-        path = "build/figures/{}/{}".format(self.robot, self.lifting_functions)
-        os.makedirs(os.path.dirname(path + "/_.png"), exist_ok=True)
+        path = 'build/figures/paper/'
+        os.makedirs(os.path.dirname(path), exist_ok=True)
 
         utilities.plot_frob_err(frob_error, self.variance_lvl, snr, path,
                                 **kwargs)

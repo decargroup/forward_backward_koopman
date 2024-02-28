@@ -48,13 +48,14 @@ def main(cfg: omegaconf.DictConfig) -> None:
     with open(path, "wb") as f:
         data_dump = pickle.dump(kp, f)
 
-    # Predict
-    kp.x_pred = kp.predict_trajectory(
-        data.pykoop_dict['x0_valid'],
-        data.pykoop_dict['u_valid'],
-        relift_state=True,
-        return_lifted=False,
-    )
+    # Predict. Note that pedictions are only good at low noise.
+    if cfg.variance < 0.1:
+        kp.x_pred = kp.predict_trajectory(
+            data.pykoop_dict['x0_valid'],
+            data.pykoop_dict['u_valid'],
+            relift_state=True,
+            return_lifted=False,
+        )
 
     with open(path, "wb") as f:
         data_dump = pickle.dump(kp, f)

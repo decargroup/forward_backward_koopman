@@ -53,3 +53,4 @@ Thumbs.db
 
 # output folder
 build/
+.doit.db

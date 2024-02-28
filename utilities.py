@@ -476,9 +476,6 @@ def plot_frob_err(frob_error: Dict[str, np.ndarray], variances: np.ndarray,
         ncol=4,
     )
 
-    path = 'build/figures/paper/'
-    os.makedirs(os.path.dirname(path), exist_ok=True)
-
     fig.savefig('{}/frob_norm_sqrd.png'.format(path), bbox_inches='tight')
     fig.savefig('{}/frob_norm_sqrd.pdf'.format(path), bbox_inches='tight')
 
