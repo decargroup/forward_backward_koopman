@@ -672,7 +672,7 @@ def summary_fig(
                                 (conv_param * norm_params[1]),
                                 label=tag + " (biased)",
                                 color=color_list[2],
-                                linestyle=linestyle_dict[tag],
+                                linestyle=linestyle_dict['EDMD'],
                                 zorder=4,
                                 linewidth=2.5)
                     else:
@@ -721,7 +721,6 @@ def summary_fig(
 
         fig.text(0.49, 0.8, r'$\mathbf{U}_\mathrm{ff}$')
         fig.text(0.595, 0.8, r'$\tilde{\mathbf{U}}$')
-        ax.spines[['right', 'top']].set_visible(False)
 
         handles, labels = ax.get_legend_handles_labels()
 
