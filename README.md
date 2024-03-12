@@ -12,15 +12,6 @@ the soft robot dataset, run
 $ git clone --recurse-submodules git@github.com:decargroup/forward_backward_koopman.git
 ```
 
-## Installation
-
-To clone the repository and its
-[submodule](https://github.com/ramvasudevan/soft-robot-koopman), which contains
-the soft robot dataset, run
-```sh
-$ git clone --recurse-submodules git@github.com:decarsg/system_norm_koopman.git
-```
-
 To install all the required dependencies for this project, it is recommended to create a virtual environment. After activating the virtual environment, run
 ```sh
 (venv) $ pip install -r ./requirements.txt
