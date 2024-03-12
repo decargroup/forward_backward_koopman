@@ -12,20 +12,32 @@ the soft robot dataset, run
 $ git clone --recurse-submodules git@github.com:decargroup/forward_backward_koopman.git
 ```
 
-## Generating data
+## Installation
 
-    * Duffing oscillator: python preprocess.py preprocessing=nl_msd
-    * Soft robot: python preprocess.py preprocessing=soft_robot
-    * Soft robot +: python preprocess.py --multirun preprocessing=soft_robot preprocessing.data.noise=0,0.00001,0.00005,0.0001,0.0005,0.001,0.005,0.01,0.02,0.04,0.06,0.08,0.1,0.2,0.4,0.6,0.8,1
+To clone the repository and its
+[submodule](https://github.com/ramvasudevan/soft-robot-koopman), which contains
+the soft robot dataset, run
+```sh
+$ git clone --recurse-submodules git@github.com:decarsg/system_norm_koopman.git
+```
 
-## Fitting models
+To install all the required dependencies for this project, it is recommended to create a virtual environment. After activating the virtual environment, run
+```sh
+(venv) $ pip install -r ./requirements.txt
+```
 
-    * Duffing oscillator: python main.py --multirun lifting_functions@pykoop_pipeline=nl_msd_poly2_centers10 regressors@pykoop_pipeline=EDMD,EDMD-AS,FBEDMD,FBEDMD-AS robot=nl_msd
-    * Soft robot: python main.py --multirun lifting_functions@pykoop_pipeline=soft_robot_poly2_centers10 regressors@pykoop_pipeline=EDMD,EDMD-AS,FBEDMD,FBEDMD-AS robot=soft_robot
-    * Soft robot +: python main.py --multirun lifting_functions@pykoop_pipeline=soft_robot_poly2_centers10 regressors@pykoop_pipeline=EDMD,EDMD-AS,FBEDMD,FBEDMD-AS variance=0,0.00001,0.00005,0.0001,0.0005,0.001,0.005,0.01,0.02,0.04,0.06,0.08,0.1,0.2,0.4,0.6,0.8,1 robot=soft_robot
+The LMI solver used, MOSEK, requires a license to use. You can request personal
+academic license [here](https://www.mosek.com/products/academic-licenses/). You
+will be emailed a license file which must be placed in `~/mosek/mosek.lic`[^2].
 
-## Generating plots
+[^1]: On Windows, use `> \venv\Scripts\activate`.
+[^2]: On Windows, place the license in `C:\Users\<USER>\mosek\mosek.lic`.
 
-    * Duffing oscillator: python plot.py plotting@what_to_plot=nl_msd_plots
-    * Soft robot: python plot.py plotting@what_to_plot=soft_robot_plots
-    * Soft robot +: python plot.py plotting@what_to_plot=frob_err_plot
+## Usage
+
+To automatically generate all the plots used in the paper, run
+```sh
+(venv) $ doit
+```
+
+The plots will be found in `build/figures/paper`.
