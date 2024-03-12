@@ -14,7 +14,9 @@ def task_generate_data():
             'name':
             f'preprocessing {robot}',
             'targets': [
-                WD.joinpath(f'build/preprocessed_data/{robot}/variance_0.01_norm_params.bin'),
+                WD.joinpath(
+                    f'build/preprocessed_data/{robot}/variance_0.01_norm_params.bin'
+                ),
             ],
             'actions': [
                 ('python preprocess.py '
@@ -40,7 +42,9 @@ def task_generate_data_variances():
             'name':
             f'preprocessing soft_robot with variance {variance}',
             'targets': [
-                WD.joinpath(f'build/preprocessed_data/soft_robot/variance_{variance}_norm_params.bin'),
+                WD.joinpath(
+                    f'build/preprocessed_data/soft_robot/variance_{variance}_norm_params.bin'
+                ),
             ],
             'actions': [
                 ('python preprocess.py preprocessing=soft_robot '
@@ -53,33 +57,34 @@ def task_generate_data_variances():
 
 def task_fit_predict():
     """Fit Koopman models and run predictions with no added noise."""
-    for lifting_function in ['nl_msd_poly2_centers10']:
-        # Select robot
-        if lifting_function == 'nl_msd_poly2_centers10':
-            robot = 'nl_msd'
-        else:
-            robot = 'soft_robot'
-        # Iterate over regressors
-        for regressor in ['EDMD', 'EDMD-AS', 'FBEDMD', 'FBEDMD-AS']:
-            hydra_path = WD.joinpath(
-                f'build/hydra_outputs/fit/{lifting_function}_{regressor}')
-            yield {
-                'name':
-                f'fitting {lifting_function} with {regressor}',
-                'file_dep': [
-                    WD.joinpath(f'build/preprocessed_data/{robot}/variance_0.01_norm_params.bin'),
-                ],
-                'targets': [
-                    WD.joinpath(f'build/pykoop_objects/{robot}/variance_0.01/kp_{regressor}_{lifting_function}.bin'),
-                ],
-                'actions': [
-                    ('python main.py '
-                     f'robot={robot} '
-                     f'regressors@pykoop_pipeline={regressor} '
-                     f'lifting_functions@pykoop_pipeline={lifting_function} '
-                     f'hydra.run.dir={hydra_path}'),
-                ],
-            }
+    # Select robot
+    lifting_function = 'nl_msd_poly2_centers10'
+    robot = 'nl_msd'
+    # Iterate over regressors
+    for regressor in ['EDMD', 'EDMD-AS', 'FBEDMD', 'FBEDMD-AS']:
+        hydra_path = WD.joinpath(
+            f'build/hydra_outputs/fit/{lifting_function}_{regressor}')
+        yield {
+            'name':
+            f'fitting {lifting_function} with {regressor}',
+            'file_dep': [
+                WD.joinpath(
+                    f'build/preprocessed_data/{robot}/variance_0.01_norm_params.bin'
+                ),
+            ],
+            'targets': [
+                WD.joinpath(
+                    f'build/pykoop_objects/{robot}/variance_0.01/kp_{regressor}_{lifting_function}.bin'
+                ),
+            ],
+            'actions': [
+                ('python main.py '
+                 f'robot={robot} '
+                 f'regressors@pykoop_pipeline={regressor} '
+                 f'lifting_functions@pykoop_pipeline={lifting_function} '
+                 f'hydra.run.dir={hydra_path}'),
+            ],
+        }
 
 
 def task_fit_predict_variances():
@@ -98,10 +103,14 @@ def task_fit_predict_variances():
                 'name':
                 f'fitting soft_robot with {regressor} using soft_robot_poly2_centers10 and variance {variance}',
                 'file_dep': [
-                    WD.joinpath(f'build/preprocessed_data/soft_robot/variance_{variance}_norm_params.bin'),
+                    WD.joinpath(
+                        f'build/preprocessed_data/soft_robot/variance_{variance}_norm_params.bin'
+                    ),
                 ],
                 'targets': [
-                    WD.joinpath(f'build/pykoop_objects/soft_robot/variance_{variance}/kp_{regressor}_{lifting_function}.bin'),
+                    WD.joinpath(
+                        f'build/pykoop_objects/soft_robot/variance_{variance}/kp_{regressor}_{lifting_function}.bin'
+                    ),
                 ],
                 'actions':
                 [('python main.py robot=soft_robot '
@@ -118,20 +127,23 @@ def task_generate_plots():
         if plot_type == 'nl_msd_plots':
             targets = [
                 WD.joinpath('build/figures/paper/nl_msd_polar.pdf'),
-                WD.joinpath('build/figures/paper/nl_msd_summary_trajectory.pdf'),
+                WD.joinpath(
+                    'build/figures/paper/nl_msd_summary_trajectory.pdf'),
                 WD.joinpath('build/figures/paper/nl_msd_trajectory_err.pdf'),
             ]
         else:
             targets = [
                 WD.joinpath('build/figures/paper/soft_robot_error_bars.pdf'),
                 WD.joinpath('build/figures/paper/soft_robot_polar.pdf'),
-                WD.joinpath('build/figures/paper/soft_robot_trajectory_err.pdf'),
+                WD.joinpath(
+                    'build/figures/paper/soft_robot_trajectory_err.pdf'),
             ]
         hydra_path = WD.joinpath(f'build/hydra_outputs/plot/{plot_type}')
         yield {
             'name':
             f'generating {plot_type}',
-            'targets': targets,
+            'targets':
+            targets,
             'task_dep': ['fit_predict', 'fit_predict_variances'],
             'actions': [
                 ('python plot.py '

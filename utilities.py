@@ -2,6 +2,7 @@ import numpy as np
 import scipy
 from numpy import random
 import matplotlib.pyplot as plt
+import matplotlib
 from typing import Dict
 from pykoop.lmi_regressors import LmiRegressor
 from pykoop import lmi_regressors
@@ -100,7 +101,7 @@ def plot_rms_and_avg_error_paper(
 ) -> None:
 
     plt.rcParams.update(**kwargs)
-    usetex = False
+    usetex = True if shutil.which('latex') else False
     if usetex:
         plt.rc('text', usetex=True)
 
@@ -243,7 +244,7 @@ def plot_trajectory_error_paper(
     n_val_eps = int(np.max(true_val_data[:, 0]) + 1)
 
     plt.rcParams.update(**kwargs)
-    usetex = False
+    usetex = True if shutil.which('latex') else False
     if usetex:
         plt.rc('text', usetex=True)
 
@@ -435,7 +436,7 @@ def plot_frob_err(frob_error: Dict[str, np.ndarray], variances: np.ndarray,
                   snr: np.ndarray, path: str, **kwargs) -> None:
 
     plt.rcParams.update(**kwargs)
-    usetex = False
+    usetex = True if shutil.which('latex') else False
     if usetex:
         plt.rc('text', usetex=True)
     i = 0
@@ -484,7 +485,7 @@ def plot_polar(koop_matrices: Dict[str, np.ndarray], path: str, robot: str,
                **kwargs):
 
     plt.rcParams.update(**kwargs)
-    usetex = False
+    usetex = True if shutil.which('latex') else False
     if usetex:
         plt.rc('text', usetex=True)
 
@@ -626,7 +627,8 @@ def summary_fig(
     n_val_eps = int(np.max(true_val_data[:, 0]) + 1)
 
     plt.rcParams.update(**kwargs)
-    usetex = False
+    plt.rc('font', size=12)
+    usetex = True if shutil.which('latex') else False
     if usetex:
         plt.rc('text', usetex=True)
 
@@ -719,7 +721,7 @@ def summary_fig(
                        left=False,
                        labelleft=False)
 
-        fig.text(0.49, 0.8, r'$\mathbf{U}_\mathrm{ff}$')
+        fig.text(0.49, 0.8, r'$\mathbf{U}_\mathrm{f}$')
         fig.text(0.595, 0.8, r'$\tilde{\mathbf{U}}$')
 
         handles, labels = ax.get_legend_handles_labels()
