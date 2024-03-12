@@ -27,8 +27,7 @@ To install all the required dependencies for this project, it is recommended to 
 ```
 
 The LMI solver used, MOSEK, requires a license to use. You can request personal
-academic license [here](https://www.mosek.com/products/academic-licenses/). You
-will be emailed a license file which must be placed in `~/mosek/mosek.lic`[^2].
+academic license [here](https://www.mosek.com/products/academic-licenses/).
 
 [^1]: On Windows, use `> \venv\Scripts\activate`.
 [^2]: On Windows, place the license in `C:\Users\<USER>\mosek\mosek.lic`.
