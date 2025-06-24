@@ -1,7 +1,7 @@
 defaults:
   # Setting default for preprocessed data
   - setups@_here_: plot
-  - plotting@what_to_plot: nl_msd_plots
+  - plotting@what_to_plot: soft_robot_plots
   - plotting@_here_: rcparams
   - _self_
 
@@ -11,6 +11,7 @@ what_to_plot:
   - EDMD-AS
   - FBEDMD
   - FBEDMD-AS
+  profiler: True
 
 hydra:
   run:

@@ -10,6 +10,7 @@ import pykoop
 import os
 from random import seed
 from random import randint
+from memory_profiler import profile
 
 
 class PreprocessSoftRobot:
@@ -299,6 +300,7 @@ class PreprocessNonlinearMassSpringDamper:
         self.cutoff_freq = cutoff_freq
         self.filter_order = filter_order
 
+    @profile
     def preprocess(self, path: str):
 
         pykoop_dict = {}
@@ -462,7 +464,7 @@ def main(cfg: omegaconf.DictConfig) -> None:
 
     data = hydra.utils.instantiate(cfg.preprocessing.data, _convert_='all')
 
-    data.preprocess(cfg['preprocessing']['path'])
+    profile(data.preprocess)(cfg['preprocessing']['path'])
 
 
 if __name__ == '__main__':

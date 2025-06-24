@@ -1,0 +1,18 @@
+lifting_functions: 
+  -
+    - sp
+    - _target_: pykoop.SplitPipeline
+      lifting_functions_state:
+        -
+          - pl
+          - _target_: pykoop.PolynomialLiftingFn
+            order: 2
+        -
+          - rbf
+          - _target_: pykoop.RbfLiftingFn
+            rbf: 'thin_plate'
+            centers:
+              _target_: pykoop.QmcCenters
+              n_centers: 50
+              random_state: 1
+            shape: 0.5

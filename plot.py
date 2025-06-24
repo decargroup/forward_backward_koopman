@@ -13,9 +13,10 @@ import os
 
 class PlotPaper():
 
-    def __init__(self, regressors: list, lifting_functions, robot, variance,
+    def __init__(self, regressors: list, profiler: str, lifting_functions, robot, variance,
                  delay, n, val):
         self.regressors = regressors
+        self.profiler = profiler
         self.lifting_functions = lifting_functions
         self.robot = robot
         self.variance = variance
@@ -24,16 +25,17 @@ class PlotPaper():
         self.val = val
 
     def plot(self, **kwargs):
-        x_pred = {}
-        koop_matrices = {}
-        for regressor in self.regressors:
-            with open(
-                    "build/pykoop_objects/{}/variance_{}/kp_{}_{}_{}.bin".
-                    format(self.robot, self.variance, regressor, self.robot,
-                           self.lifting_functions), "rb") as f:
-                kp = pickle.load(f)
-            x_pred[regressor] = kp.x_pred
-            koop_matrices[regressor] = kp.regressor_.coef_.T
+        if self.profiler == False:
+            x_pred = {}
+            koop_matrices = {}
+            for regressor in self.regressors:
+                with open(
+                        "build/pykoop_objects/{}/variance_{}/kp_{}_{}_{}.bin".
+                        format(self.robot, self.variance, regressor, self.robot,
+                            self.lifting_functions), "rb") as f:
+                    kp = pickle.load(f)
+                x_pred[regressor] = kp.x_pred
+                koop_matrices[regressor] = kp.regressor_.coef_.T
 
         # Get the true data
         with open(
@@ -53,6 +55,9 @@ class PlotPaper():
         path = "build/figures/paper"
 
         os.makedirs(os.path.dirname(path + "/_.png"), exist_ok=True)
+
+        if self.profiler == True:
+            utilities.regressor_profilers(self.regressors)
 
         utilities.plot_rms_and_avg_error_paper(x_pred,
                                                true_data,

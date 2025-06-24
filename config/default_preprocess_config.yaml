@@ -1,7 +1,7 @@
 defaults:
   # Setting default for preprocessed data
   - setups@preprocessing: preprocess
-  - preprocessing: soft_robot
+  - preprocessing: nl_msd
   - _self_
 
 hydra:

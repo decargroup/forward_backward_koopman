@@ -9,7 +9,10 @@ import logging
 import os
 from random import randint
 import config
-
+# from memory_profiler import profile
+import time
+# from scalene import scalene_profiler
+from pathlib import Path
 
 @hydra.main(config_path="config",
             config_name="default_kp_config",
@@ -40,25 +43,62 @@ def main(cfg: omegaconf.DictConfig) -> None:
                 cfg.robot, cfg.variance), "rb") as f:
         data = pickle.load(f)
 
+    # Train model 
+    # profile(kp.fit)(data.pykoop_dict['X_train'],
+    #        n_inputs=data.pykoop_dict['n_inputs'],
+    #        episode_feature=True)
+
     # Train model
-    kp.fit(data.pykoop_dict['X_train'],
-           n_inputs=data.pykoop_dict['n_inputs'],
-           episode_feature=True)
+    # if cfg.profiler == False:
+    #     kp.fit(data.pykoop_dict['X_train'],
+    #        n_inputs=data.pykoop_dict['n_inputs'],
+    #        episode_feature=True)
+    
+    # Analyse computation cost using profiler
+    profile(kp.fit)(data.pykoop_dict['X_train'],
+        n_inputs=data.pykoop_dict['n_inputs'],
+        episode_feature=True)
 
     with open(path, "wb") as f:
         data_dump = pickle.dump(kp, f)
 
     # Predict. Note that pedictions are only good at low noise.
-    if cfg.variance < 0.1:
-        kp.x_pred = kp.predict_trajectory(
-            data.pykoop_dict['x0_valid'],
-            data.pykoop_dict['u_valid'],
-            relift_state=True,
-            return_lifted=False,
-        )
+    if cfg.profiler == False:
+        if cfg.variance < 0.1:
+            kp.x_pred = kp.predict_trajectory(
+                data.pykoop_dict['x0_valid'],
+                data.pykoop_dict['u_valid'],
+                relift_state=True,
+                return_lifted=False,
+            )
+  
 
     with open(path, "wb") as f:
         data_dump = pickle.dump(kp, f)
+    
+    # stats_file = Path("stats")
+
+    # last_func_line = None
+    # with stats_file.open() as f:
+    #     for line in f:
+    #         if line.startswith("FUNC") and "pykoop.koopman_pipeline.fit" in line:
+    #             last_func_line = line.strip()
+
+    # if last_func_line is None:
+    #     print("No matching FUNC line found.")
+    # else:
+    #     parts = last_func_line.split()
+    #     if len(parts) < 6:
+    #         print("Malformed FUNC line.")
+    #     else:
+    #         start_mem = float(parts[2])
+    #         start_time = float(parts[3])
+    #         end_mem = float(parts[4])
+    #         end_time = float(parts[5])
+    #         duration = end_time - start_time
+    #         mem_diff = end_mem - start_mem
+    #         print(f"Function duration: {duration:.4f} seconds")
+    #         print(f"Memory change: {mem_diff:+.2f} MB (start: {start_mem:.2f}, end: {end_mem:.2f})")
 
 
 if __name__ == '__main__':

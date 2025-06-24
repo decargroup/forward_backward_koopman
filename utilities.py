@@ -18,6 +18,9 @@ import os
 from random import randint
 import pykoop
 import shutil
+from pathlib import Path
+import scipy.io as sio
+import numpy as np
 
 polite_stop = False
 
@@ -86,6 +89,245 @@ def add_noise(data, Q, mu, n, seed: int = 3) -> np.ndarray:
         s_pow, n_pow, snr))
 
     return Data.T, snr
+
+
+def regressor_profilers(regressors, func_name="pykoop.koopman_pipeline.fit"):
+    lifting_levels = ["10", "25", "50"]
+    all_times = {regressor: [] for regressor in regressors}
+    all_memories = {regressor: [] for regressor in regressors}
+
+    for regressor in regressors:
+        regressor_dir = Path(f"build/stats/{regressor}")
+        regressor_times = []
+        regressor_memories = []
+
+        dat_files = sorted(regressor_dir.glob("*.dat"))
+        if len(dat_files) < 3:
+            print(f"⚠️ Not enough .dat files found for {regressor}")
+            continue
+
+        for i, lifting_label in enumerate(lifting_levels):
+            dat_path = dat_files[i]
+
+            times = []
+            max_mems = []
+
+            with dat_path.open() as f:
+                lines = f.readlines()
+                num_lines = len(lines)
+
+                idx = 0
+                current_max_mem = 0
+                current_start_time = None
+                current_end_time = None
+
+                while idx < num_lines:
+                    line = lines[idx]
+
+                    if line.startswith("CMDLINE"):
+                        # Save the previous run if it exists
+                        if current_start_time is not None and current_end_time is not None:
+                            duration = current_end_time - current_start_time
+                            times.append(duration)
+                            max_mems.append(current_max_mem)
+
+                        # Start a new run → reset memory
+                        current_max_mem = 0
+                        current_start_time = None
+                        current_end_time = None
+
+                        # CASE 1: Check if previous line is FUNC (belongs to this run)
+                        if idx > 0 and lines[idx - 1].startswith("FUNC") and func_name in lines[idx - 1]:
+                            func_line = lines[idx - 1].strip().split()
+                            if len(func_line) >= 6:
+                                current_start_time = float(func_line[3])
+                                current_end_time = float(func_line[5])
+                        else:
+                            # CASE 2: Look ahead for FUNC for this run
+                            idx_search = idx + 1
+                            while idx_search < num_lines:
+                                next_line = lines[idx_search]
+                                if next_line.startswith("CMDLINE"):
+                                    break  # No FUNC found before next CMDLINE
+                                if next_line.startswith("FUNC") and func_name in next_line:
+                                    func_line = next_line.strip().split()
+                                    if len(func_line) >= 6:
+                                        current_start_time = float(func_line[3])
+                                        current_end_time = float(func_line[5])
+                                    break
+                                idx_search += 1
+
+                    elif line.startswith("MEM"):
+                        parts = line.strip().split()
+                        if len(parts) < 3:
+                            idx += 1
+                            continue
+                        mem_value = float(parts[1])
+                        current_max_mem = max(current_max_mem, mem_value)
+
+                    idx += 1
+
+                # Save the last run if the file ends without another CMDLINE
+                if current_start_time is not None and current_end_time is not None:
+                    duration = current_end_time - current_start_time
+                    times.append(duration)
+                    max_mems.append(current_max_mem)
+
+            regressor_times.append(times)
+            regressor_memories.append(max_mems)
+
+        all_times[regressor] = regressor_times
+        all_memories[regressor] = regressor_memories
+
+    # Prepare subplot
+    fig, axs = plt.subplots(3, 2, figsize=(14, 12), sharex=True)
+    lifting_levels = ["normal", "25_lift", "50_lift"]
+
+    for row, lifting_label in enumerate(lifting_levels):
+        time_data = []
+        time_labels = []
+        mem_data = []
+        mem_labels = []
+
+        # Collect data for this lifting level across all regressors
+        for regressor in regressors:
+            time_samples = all_times[regressor][row]   # row 0: normal, row 1: 25_lift, row 2: 50_lift
+            mem_samples = all_memories[regressor][row]
+
+            time_data.append(time_samples)
+            time_labels.append(regressor)
+
+            mem_data.append(mem_samples)
+            mem_labels.append(regressor)
+
+        # Plot Time Boxplot
+        box_time = axs[row, 0].boxplot(
+            time_data,
+            labels=time_labels,
+            showfliers=False,
+            patch_artist=True,
+            showmeans=True,
+            meanline=True,
+            meanprops={'color': 'black', 'linestyle': '-', 'linewidth': 1.4}
+        )
+
+        # Apply colors to boxes
+        for patch, regressor in zip(box_time['boxes'], regressors):
+            patch.set_facecolor(color_dict[regressor])
+
+        # Remove median lines
+        for median in box_time['medians']:
+            median.set_visible(False)
+
+        # axs[row, 0].set_title(f"Computation Time - {lifting_label}")
+        axs[row, 0].set_ylabel("Time (s)")
+        axs[row, 0].grid(True, axis='y')
+
+        # Plot Memory Boxplot
+        box_mem = axs[row, 1].boxplot(
+            mem_data,
+            labels=mem_labels,
+            showfliers=False,
+            patch_artist=True,
+            showmeans=True,
+            meanline=True,
+            meanprops={'color': 'black', 'linestyle': '-', 'linewidth': 1.4}
+        )
+
+        # Apply colors to boxes
+        for patch, regressor in zip(box_mem['boxes'], regressors):
+            patch.set_facecolor(color_dict[regressor])
+
+        # Remove median lines
+        for median in box_mem['medians']:
+            median.set_visible(False)
+
+        # axs[row, 1].set_title(f"Maximum Memory Usage - {lifting_label}")
+        axs[row, 1].set_ylabel("Memory (MB)")
+        axs[row, 1].grid(True, axis='y')
+
+    # Final layout and save
+    plt.tight_layout()
+    plt.savefig("build/stats/computation_memory_comparison.png")
+    plt.close()
+
+    print("✅ Computation and memory subplot saved to build/stats/computation_memory_comparison.png")
+
+    # # Create boxplots for times
+    # plt.figure(figsize=(12, 7))
+    # positions = []
+    # data = []
+    # labels = []
+    # pos_offset = 0
+
+    # for regressor in regressors:
+    #     times_lists = all_times[regressor]
+    #     for j, times in enumerate(times_lists):
+    #         pos = pos_offset + j + 1
+    #         positions.append(pos)
+    #         data.append(times)
+    #         labels.append(f"{regressor}\n{lifting_levels[j]}")
+    #     pos_offset += len(lifting_levels) + 1
+
+    # box = plt.boxplot(data, positions=positions, showfliers=False, patch_artist=True)
+
+    # # Apply regressor colors
+    # box_index = 0
+    # for regressor in regressors:
+    #     regressor_color = color_dict[regressor]
+    #     for _ in lifting_levels:
+    #         box['boxes'][box_index].set_facecolor(regressor_color)
+    #         box_index += 1
+
+    # # plt.title("Computation Time Comparison")
+    # plt.ylabel("Time (s)")
+    # plt.xticks(positions, labels, rotation=45)
+    # plt.grid(True, axis='y')
+    # plt.tight_layout()
+    # plt.savefig("build/stats/computation_time_boxplot.png")
+    # plt.close()
+    # print("✅ Computation time boxplot saved to build/stats/computation_time_boxplot.png")
+
+
+    # # Create boxplots for memory
+    # plt.figure(figsize=(12, 7))
+    # positions = []
+    # data = []
+    # labels = []
+    # pos_offset = 0
+
+    # for regressor in regressors:
+    #     mem_lists = all_memories[regressor]
+    #     for j, mems in enumerate(mem_lists):
+    #         pos = pos_offset + j + 1
+    #         positions.append(pos)
+    #         data.append(mems)
+    #         labels.append(f"{regressor}\n{lifting_levels[j]}")
+    #     pos_offset += len(lifting_levels) + 1
+
+    # box = plt.boxplot(data, positions=positions, showfliers=False, patch_artist=True)
+
+    # # Apply regressor colors
+    # box_index = 0
+    # for regressor in regressors:
+    #     regressor_color = color_dict[regressor]
+    #     for _ in lifting_levels:
+    #         box['boxes'][box_index].set_facecolor(regressor_color)
+    #         box_index += 1
+
+    # # plt.title("Maximum Memory Usage Comparison")
+    # plt.ylabel("Memory (MB)")
+    # plt.xticks(positions, labels, rotation=45)
+    # plt.grid(True, axis='y')
+    # plt.tight_layout()
+    # plt.savefig("build/stats/memory_usage_boxplot.png")
+    # plt.close()
+    # print("✅ Memory usage boxplot saved to build/stats/memory_usage_boxplot.png")
+
+
+
+
+
 
 
 def plot_rms_and_avg_error_paper(
@@ -324,7 +566,7 @@ def plot_trajectory_error_paper(
             ax.set(ylabel=r'$x_{}$ (cm)'.format(2))
             ax.set(xlabel=r'$x_{}$ (cm)'.format(1))
         else:
-            ax.set(ylabel=r'$x_{}$ (mm)'.format(2))
+            ax.set(ylabel=r'$x_{}$ (mm/s)'.format(2))
             ax.set(xlabel=r'$x_{}$ (mm)'.format(1))
         # ax.set_ylim(min_y - np.abs(min_y / 10), max_y + np.abs(max_y / 10))
         # ax.set_xlim(min_x - np.abs(min_x / 10), max_x + np.abs(max_x / 10))
@@ -383,7 +625,11 @@ def plot_trajectory_error_paper(
                 if robot == 'soft_robot':
                     ax[k].set(ylabel='$\Delta x_{}$ (cm)'.format(k + 1))
                 else:
-                    ax[k].set(ylabel='$\Delta x_{}$ (mm)'.format(k + 1))
+                    if k == 0:
+                        ax[k].set(ylabel='$\Delta x_{}$ (mm)'.format(k + 1))
+                    else: 
+                        ax[k].set(ylabel='$\Delta x_{}$ (mm/s)'.format(k + 1))
+
 
         if robot == 'nl_msd':
             ax[0].set_ylim(-3, 3)
@@ -1478,6 +1724,8 @@ class LmiEdmdSpectralRadiusConstrAvgNoAS(LmiRegressor):
         B = scipy.linalg.lstsq((np.eye(A.shape[0]) + A), temp)[0]
 
         return np.hstack([A, B]).T
+    
+
 
     def _validate_parameters(self) -> None:
         # Check spectral radius

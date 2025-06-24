@@ -1,12 +1,13 @@
 defaults:
   - setups@_here_: kp_pipeline
-  - regressors@pykoop_pipeline: FBEDMD-AS
+  - regressors@pykoop_pipeline: FBEDMD
   - lifting_functions@pykoop_pipeline: nl_msd_poly2_centers10
   - _self_
 
-robot: nl_msd
+robot: soft_robot
 variance: 0.01
 delay: 0
+profiler: False
 
 hydra:
   run:
