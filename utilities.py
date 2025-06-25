@@ -91,7 +91,7 @@ def add_noise(data, Q, mu, n, seed: int = 3) -> np.ndarray:
     return Data.T, snr
 
 
-def regressor_profilers(regressors, func_name="pykoop.koopman_pipeline.fit"):
+def regressor_profilers(regressors, func_name="pykoop.koopman_pipeline.fit", **kwargs) -> None:
     lifting_levels = ["10", "25", "50"]
     all_times = {regressor: [] for regressor in regressors}
     all_memories = {regressor: [] for regressor in regressors}
@@ -179,8 +179,17 @@ def regressor_profilers(regressors, func_name="pykoop.koopman_pipeline.fit"):
         all_times[regressor] = regressor_times
         all_memories[regressor] = regressor_memories
 
-    # Prepare subplot
-    fig, axs = plt.subplots(3, 2, figsize=(14, 12), sharex=True)
+
+    plt.rcParams.update(**kwargs)
+    usetex = True if shutil.which('latex') else False
+    if usetex:
+        plt.rc('text', usetex=True)
+
+        plt.rcParams.update({
+        'font.family': 'serif',
+        })
+
+    fig, axs = plt.subplots(3, 2, figsize=(5.3348, 5.5), sharex=True)
     lifting_levels = ["normal", "25_lift", "50_lift"]
 
     for row, lifting_label in enumerate(lifting_levels):
@@ -191,7 +200,7 @@ def regressor_profilers(regressors, func_name="pykoop.koopman_pipeline.fit"):
 
         # Collect data for this lifting level across all regressors
         for regressor in regressors:
-            time_samples = all_times[regressor][row]   # row 0: normal, row 1: 25_lift, row 2: 50_lift
+            time_samples = all_times[regressor][row]
             mem_samples = all_memories[regressor][row]
 
             time_data.append(time_samples)
@@ -200,10 +209,9 @@ def regressor_profilers(regressors, func_name="pykoop.koopman_pipeline.fit"):
             mem_data.append(mem_samples)
             mem_labels.append(regressor)
 
-        # Plot Time Boxplot
+        # Plot Time Boxplot (remove labels from here)
         box_time = axs[row, 0].boxplot(
             time_data,
-            labels=time_labels,
             showfliers=False,
             patch_artist=True,
             showmeans=True,
@@ -219,14 +227,19 @@ def regressor_profilers(regressors, func_name="pykoop.koopman_pipeline.fit"):
         for median in box_time['medians']:
             median.set_visible(False)
 
-        # axs[row, 0].set_title(f"Computation Time - {lifting_label}")
-        axs[row, 0].set_ylabel("Time (s)")
+        # Prepare LaTeX formatted x-tick labels (handle dashes correctly)
+        # latex_labels = [r"$\mathrm{" + reg.replace("_", r"\_").replace("-", r"\text{-}") + "}$" for reg in time_labels]
+
+        axs[row, 0].set_xticks(range(1, len(time_labels) + 1))
+        # axs[row, 0].set_xticklabels(latex_labels, rotation=40)
+        axs[row, 0].set_xticklabels(time_labels, rotation=40)
+
+        axs[row, 0].set_ylabel(r"$\mathrm{Time\ (s)}$")
         axs[row, 0].grid(True, axis='y')
 
-        # Plot Memory Boxplot
+        # Plot Memory Boxplot (remove labels from here)
         box_mem = axs[row, 1].boxplot(
             mem_data,
-            labels=mem_labels,
             showfliers=False,
             patch_artist=True,
             showmeans=True,
@@ -242,13 +255,19 @@ def regressor_profilers(regressors, func_name="pykoop.koopman_pipeline.fit"):
         for median in box_mem['medians']:
             median.set_visible(False)
 
-        # axs[row, 1].set_title(f"Maximum Memory Usage - {lifting_label}")
-        axs[row, 1].set_ylabel("Memory (MB)")
+        # Prepare LaTeX formatted x-tick labels (handle dashes correctly)
+        # latex_labels = [r"$\mathrm{" + reg.replace("_", r"\_").replace("-", r"\text{-}") + "}$" for reg in mem_labels]
+
+        axs[row, 1].set_xticks(range(1, len(mem_labels) + 1))
+        axs[row, 1].set_xticklabels(mem_labels, rotation=40)
+
+        axs[row, 1].set_ylabel(r"$\mathrm{Memory\ (MB)}$")
         axs[row, 1].grid(True, axis='y')
 
     # Final layout and save
     plt.tight_layout()
     plt.savefig("build/stats/computation_memory_comparison.png")
+    plt.savefig("build/figures/paper/computation_memory_comparison.pdf")
     plt.close()
 
     print("✅ Computation and memory subplot saved to build/stats/computation_memory_comparison.png")

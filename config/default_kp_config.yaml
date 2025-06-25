@@ -1,6 +1,6 @@
 defaults:
   - setups@_here_: kp_pipeline
-  - regressors@pykoop_pipeline: FBEDMD
+  - regressors@pykoop_pipeline: EDMD-AS
   - lifting_functions@pykoop_pipeline: nl_msd_poly2_centers10
   - _self_
 

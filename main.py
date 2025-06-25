@@ -55,9 +55,13 @@ def main(cfg: omegaconf.DictConfig) -> None:
     #        episode_feature=True)
     
     # Analyse computation cost using profiler
-    profile(kp.fit)(data.pykoop_dict['X_train'],
+    kp.fit(data.pykoop_dict['X_train'],
         n_inputs=data.pykoop_dict['n_inputs'],
         episode_feature=True)
+    
+    # profile(kp.fit)(data.pykoop_dict['X_train'],
+    #     n_inputs=data.pykoop_dict['n_inputs'],
+    #     episode_feature=True)
 
     with open(path, "wb") as f:
         data_dump = pickle.dump(kp, f)
